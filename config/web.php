@@ -23,6 +23,10 @@ $config = [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
         ],
+        'formatter' => [
+            'dateFormat' => 'php:Y-m-d',
+            'datetimeFormat' => 'php:Y-m-d H:i:s'
+        ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
