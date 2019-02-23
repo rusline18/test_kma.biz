@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\Users;
 use Yii;
 use yii\base\Model;
 
@@ -60,7 +61,12 @@ class LoginForm extends Model
     public function login()
     {
         if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
+            Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
+            //Сохраняем время авторизации
+            $user = \app\models\Users::findOne(Yii::$app->user->id);
+            $user->auth_date = date('Y-m-d H:i:s', time());
+            $user->save();
+            return true;
         }
         return false;
     }
