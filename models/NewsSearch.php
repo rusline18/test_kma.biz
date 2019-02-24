@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\News;
@@ -11,14 +12,17 @@ use app\models\News;
  */
 class NewsSearch extends News
 {
+    public $to_created;
+    public $from_created;
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['id'], 'integer'],
+            [['id', 'status'], 'integer'],
             [['image_path', 'title', 'description', 'text'], 'safe'],
+            [['to_created', 'from_created'], 'date', 'format' => 'php:Y-m-d']
         ];
     }
 
@@ -40,7 +44,12 @@ class NewsSearch extends News
      */
     public function search($params)
     {
-        $query = News::find();
+        $query = News::find()->with('user');
+        $user = Yii::$app->user;
+
+        if (!$user->can('admin')) {
+            $query = $query->where(['user_id' => $user->id]);
+        }
 
         // add conditions that should always apply here
 
@@ -59,11 +68,13 @@ class NewsSearch extends News
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'status' => $this->status
         ]);
 
         $query->andFilterWhere(['like', 'image_path', $this->image_path])
             ->andFilterWhere(['like', 'title', $this->title])
             ->andFilterWhere(['like', 'description', $this->description])
+            ->andFilterWhere(['between', 'created_at', $this->to_created ? $this->to_created . ' 00:00:00' : null, $this->from_created ? $this->from_created . ' 23:59:59' : null ])
             ->andFilterWhere(['like', 'text', $this->text]);
 
         return $dataProvider;

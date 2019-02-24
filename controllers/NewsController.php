@@ -5,9 +5,11 @@ namespace app\controllers;
 use Yii;
 use app\models\News;
 use app\models\NewsSearch;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\UploadedFile;
 
 /**
  * NewsController implements the CRUD actions for News model.
@@ -24,6 +26,16 @@ class NewsController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                ],
+            ],
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'create', 'update', 'active'],
+                        'roles' => ['admin', 'manager'],
+                    ],
                 ],
             ],
         ];
@@ -44,18 +56,18 @@ class NewsController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single News model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
+//    /**
+//     * Displays a single News model.
+//     * @param integer $id
+//     * @return mixed
+//     * @throws NotFoundHttpException if the model cannot be found
+//     */
+//    public function actionView($id)
+//    {
+//        return $this->render('view', [
+//            'model' => $this->findModel($id),
+//        ]);
+//    }
 
     /**
      * Creates a new News model.
@@ -66,8 +78,18 @@ class NewsController extends Controller
     {
         $model = new News();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $model->image = UploadedFile::getInstance($model, 'image');
+            if ($model->image) {
+                $model->image_path = 'images/posts/' . time() . '.'.$model->image->extension;
+            }
+            $model->user_id = Yii::$app->user->id;
+            if ($model->save()) {
+                if ($model->image) {
+                    $model->upload($model->image_path);
+                }
+                return $this->redirect(['index']);
+            }
         }
 
         return $this->render('create', [
@@ -87,7 +109,16 @@ class NewsController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            $model->image = UploadedFile::getInstance($model, 'image');
+            if ($model->image) {
+                $model->image_path = 'images/posts/' . $id . '.'.$model->image->extension;
+            }
+            if ($model->save()) {
+                if ($model->image) {
+                    $model->upload($model->image_path);
+                }
+                return $this->redirect(['index']);
+            }
         }
 
         return $this->render('update', [
@@ -95,19 +126,32 @@ class NewsController extends Controller
         ]);
     }
 
-    /**
-     * Deletes an existing News model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
+    public function actionActive($id)
     {
-        $this->findModel($id)->delete();
+        if (Yii::$app->request->get()) {
+            $model = News::findOne($id);
 
-        return $this->redirect(['index']);
+            if ($model->validate()) {
+                $model->status = $model->status ? 0 : 1;
+                return $model->save() ? 1 : 0;
+            }
+        }
+        return 0;
     }
+
+//    /**
+//     * Deletes an existing News model.
+//     * If deletion is successful, the browser will be redirected to the 'index' page.
+//     * @param integer $id
+//     * @return mixed
+//     * @throws NotFoundHttpException if the model cannot be found
+//     */
+//    public function actionDelete($id)
+//    {
+//        $this->findModel($id)->delete();
+//
+//        return $this->redirect(['index']);
+//    }
 
     /**
      * Finds the News model based on its primary key value.

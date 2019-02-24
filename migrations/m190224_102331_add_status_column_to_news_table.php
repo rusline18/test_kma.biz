@@ -29,5 +29,9 @@ class m190224_102331_add_status_column_to_news_table extends Migration
      */
     public function safeDown()
     {
+        $this->dropForeignKey('fk-news-user_id', 'news');
+
+        $this->dropColumn('news', 'status');
+        $this->dropColumn('news', 'user_id');
     }
 }

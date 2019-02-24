@@ -25,7 +25,7 @@ use yii\widgets\ActiveForm;
 
     <?= Html::checkbox('status', false, ['label' => 'Активный', 'class' => 'news-checkbox']) ?>
 
-    <?= Html::fileInput('image') ?>
+    <?= $form->field($model, 'image')->fileInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
