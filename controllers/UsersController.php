@@ -2,10 +2,12 @@
 
 namespace app\controllers;
 
+use app\models\createUsersForms;
 use app\models\User;
 use Yii;
 use app\models\Users;
 use app\models\UsersSearch;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -25,6 +27,16 @@ class UsersController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                ],
+            ],
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'create', 'update', 'active'],
+                        'roles' => ['admin'],
+                    ],
                 ],
             ],
         ];
@@ -77,10 +89,12 @@ class UsersController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Users();
+        $model = new createUsersForms();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            if ($user = $model->signup()) {
+                return $this->redirect('index');
+            }
         }
 
         return $this->render('create', [
@@ -99,8 +113,14 @@ class UsersController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $requestRole = Yii::$app->request->post('roles');
+            $roles = Yii::$app->authManager->getRole($requestRole);
+            Yii::$app->authManager->assign($roles, $model->id);
+//            var_dump($roles); die();
+            if ($model->save()){
+                return $this->redirect(['index']);
+            }
         }
 
         return $this->render('update', [

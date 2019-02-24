@@ -36,13 +36,14 @@ class Users extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'created_at', 'updated_at'], 'required'],
+            [['username', 'email'], 'required'],
             [['status', 'created_at', 'updated_at'], 'integer'],
             [['auth_date', 'date_registration'], 'safe'],
             [['username', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
-            [['username'], 'unique'],
-            [['email'], 'unique'],
+            ['username', 'unique'],
+            ['email', 'unique'],
+            [['created_at', 'updated_at'], 'default', 'value' => time()],
             [['password_reset_token'], 'unique'],
         ];
     }
@@ -65,5 +66,23 @@ class Users extends \yii\db\ActiveRecord
             'auth_date' => 'Дата авторизации',
             'date_registration' => 'Дата регистрации'
         ];
+    }
+
+    /**
+     * Generates password hash from password and sets it to the model
+     *
+     * @param string $password
+     */
+    public function setPassword($password)
+    {
+        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    /**
+     * Generates "remember me" authentication key
+     */
+    public function generateAuthKey()
+    {
+        $this->auth_key = Yii::$app->security->generateRandomString();
     }
 }

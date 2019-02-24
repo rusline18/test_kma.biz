@@ -16,9 +16,11 @@ class RbacController extends Controller
         $auth->add($user);
 
         $admin = $auth->createRole('admin');
+        $admin->description('Администратор');
         $auth->add($admin);
 
         $manager = $auth->createRole('manager');
+        $manager->description('Менеджер');
         $auth->add($manager);
 
         $auth->assign($admin, Users::USER_ADMIN);
