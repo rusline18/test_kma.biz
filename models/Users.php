@@ -20,6 +20,7 @@ use Yii;
  */
 class Users extends \yii\db\ActiveRecord
 {
+    const USER_ADMIN = 1;
     public $date_registration;
     /**
      * {@inheritdoc}
