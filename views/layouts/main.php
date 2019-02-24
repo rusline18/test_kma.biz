@@ -38,8 +38,8 @@ AppAsset::register($this);
 
     $menuItems = [
         ['label' => 'Home', 'url' => ['/site/index']],
-        ['label' => 'About', 'url' => ['/site/about']],
-        ['label' => 'Contact', 'url' => ['/site/contact']],
+        ['label' => 'Пользователи', 'url' => ['/users/index'], 'visible' => Yii::$app->user->can('admin')],
+        ['label' => 'Статьи', 'url' => ['/news/index'], 'visible' => !Yii::$app->user->isGuest],
     ];
 
     if (Yii::$app->user->isGuest) {
