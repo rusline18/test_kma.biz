@@ -72,7 +72,16 @@ class News extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return $this->hasOne(Users::className(), ['id' => 'user_id']);
+    }
+
+    /**
+     * Получакм логин пользователя
+     * @return string
+     */
+    public function getUserName()
+    {
+        return $this->user ? $this->user->username : 'не задан';
     }
 
     /**
