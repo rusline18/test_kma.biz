@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'user_id',
                 'label' => 'Автор',
-                'value' => 'user.username'
+                'value' => 'userName'
             ],
             [
                 'attribute' => 'created_at',
