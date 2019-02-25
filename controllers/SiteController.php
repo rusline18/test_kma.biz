@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\News;
 use Yii;
+use yii\data\Pagination;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -62,7 +64,17 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $query = News::find()->with('user')->where(['status' => News::NEWS_ACTIVE]);
+        $request = Yii::$app->request->get('per-page');
+        $count = $request ? $request : 1;
+        $pages = new Pagination(['totalCount' => $query->count(), 'pageSize' => $count]);
+        $posts = $query->offset($pages->offset)
+            ->limit($pages->limit)
+            ->all();
+        return $this->render('index', [
+            'model' => $posts,
+            'pages' => $pages
+        ]);
     }
 
     /**
